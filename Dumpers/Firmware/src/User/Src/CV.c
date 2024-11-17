@@ -290,7 +290,7 @@ void CV_ReadID(uint32_t chip)
   CV_WriteData(half, addr, 0x90); // read ID
   test = CV_ReadData(half, addr + 0x01); // ID reg.
   CV_WriteData(half, addr, 0xFF); // exit
-  error += (test == 0x88B0) ? 0 : 1;
+  error += (test == 0x88B0) ? 0 : 2 ^ (chip - 1);
 }
 
 uint32_t CV_SectorErase(uint32_t addr)
