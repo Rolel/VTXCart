@@ -280,7 +280,7 @@ void doLCD(void)
   switch (cur_menu) {
     case MENU_CSEL:
       sprintf(video_mem[0], get_chip_name());
-      sprintf(video_mem[1], "cVTX V%s", VERSION);
+      sprintf(video_mem[1], "VTX V%s", VERSION);
       video_attr[0] = video_attr[1] = 1;
       break;
     case MENU_MSEL:
@@ -326,8 +326,8 @@ void doLCD(void)
       video_attr[0] = video_attr[1] = 1;
       break;
     case MENU_ERROR:
-      sprintf(video_mem[0], "ERROR");
-      sprintf(video_mem[1], "%d", error);
+      sprintf(video_mem[0], "ERROR %d", error);
+      sprintf(video_mem[1], "%s", errormsg);      
       video_attr[0] = video_attr[1] = 1;
       break;
     default:

@@ -35,7 +35,7 @@ uint32_t UARTTxBuffer_head, UARTTxBuffer_tail, UARTTxBuffer_len;
 
 // menu
 uint32_t cur_menu = MENU_CSEL;
-uint32_t cur_chip = CHIP_P;
+uint32_t cur_chip = CHIP_P1;
 uint32_t cur_mode = MODE_TEST;
 
 // timer
@@ -51,6 +51,7 @@ uint32_t address;
 uint32_t sector;
 uint32_t test;
 uint32_t error;
+char errormsg[256];
 
 // flags
 uint32_t flg_test;

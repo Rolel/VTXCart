@@ -56,6 +56,7 @@ extern uint32_t address;
 extern uint32_t sector;
 extern uint32_t test;
 extern uint32_t error;
+extern char errormsg[256];
 
 // flags
 extern uint32_t flg_test;
