@@ -13,6 +13,18 @@
 #define SPI spi4
 #define SPI_Drv (&hspi4)
 
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  ((byte) & 0x80 ? '1' : '0'), \
+  ((byte) & 0x40 ? '1' : '0'), \
+  ((byte) & 0x20 ? '1' : '0'), \
+  ((byte) & 0x10 ? '1' : '0'), \
+  ((byte) & 0x08 ? '1' : '0'), \
+  ((byte) & 0x04 ? '1' : '0'), \
+  ((byte) & 0x02 ? '1' : '0'), \
+  ((byte) & 0x01 ? '1' : '0') 
+
+
 static int32_t lcd_init(void);
 static int32_t lcd_gettick(void);
 static int32_t lcd_writereg(uint8_t reg, uint8_t *pdata, uint32_t length);
@@ -268,7 +280,7 @@ void doLCD(void)
   switch (cur_menu) {
     case MENU_CSEL:
       sprintf(video_mem[0], get_chip_name());
-      sprintf(video_mem[1], "VTX V%s", VERSION);
+      sprintf(video_mem[1], "cVTX V%s", VERSION);
       video_attr[0] = video_attr[1] = 1;
       break;
     case MENU_MSEL:
@@ -292,7 +304,8 @@ void doLCD(void)
       video_attr[0] = video_attr[1] = 1;
       break;
     case MENU_TEST:
-      sprintf(video_mem[0], "E:%d", error);
+      // sprintf(video_mem[0], "E:%d", error);
+      sprintf(video_mem[0], "E:"BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(error));
       sprintf(video_mem[1], "T:%08lX", test);
       break;
     case MENU_DUMP:
@@ -309,7 +322,7 @@ void doLCD(void)
       break;
     case MENU_DONE:
       sprintf(video_mem[0], "DONE");
-      sprintf(video_mem[1], "%d", error);
+      sprintf(video_mem[1], "E: %d", error);
       video_attr[0] = video_attr[1] = 1;
       break;
     case MENU_ERROR:
