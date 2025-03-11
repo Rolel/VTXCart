@@ -8,33 +8,45 @@
 // de/scramble address
 //#define DE_SCRAMBLE_ADDR_P
 
-#define CHIP_NAME_P     "P-ROM"
-#define DUMP_FILENAME_P "prom.bin"
-#define PROG_FILENAME_P "prom"
+#define CHIP_NAME_P1     "P1-ROM"
+#define DUMP_FILENAME_P1 "p1dump.bin"
+#define PROG_FILENAME_P1 "prom-1"
+#define CHIP_NAME_P2     "P2-ROM"
+#define DUMP_FILENAME_P2 "p2dump.bin"
+#define PROG_FILENAME_P2 "prom-2"
+#define CHIP_NAME_P3     "P3-ROM"
+#define DUMP_FILENAME_P3 "p3dump.bin"
+#define PROG_FILENAME_P3 "prom-3"
 #define END_ADDRESS_P   (0x8000000 / 2) // 128 meg
 
-#define CHIP_NAME_S     "S-ROM"
-#define DUMP_FILENAME_S "srom.bin"
+#define CHIP_NAME_S     "S-ROM "
+#define DUMP_FILENAME_S "sromdump.bin"
 #define PROG_FILENAME_S "srom"
 //#define END_ADDRESS_S   (0x2000000 / 2) // 32 meg
 #define END_ADDRESS_S   (0x4000000 / 2) // 64 meg
 
-#define CHIP_NAME_M     "M-ROM"
-#define DUMP_FILENAME_M "mrom.bin"
+#define CHIP_NAME_M     "M-ROM "
+#define DUMP_FILENAME_M "mromdump.bin"
 #define PROG_FILENAME_M "mrom"
 #define END_ADDRESS_M   (0x4000000 / 2) // 64 meg
 
-#define CHIP_NAME_C     "C-ROM"
-#define DUMP_FILENAME_C "crom.bin"
-#define PROG_FILENAME_C "crom"
+#define CHIP_NAME_C1     "C1-ROM"
+#define DUMP_FILENAME_C1 "c1dump.bin"
+#define PROG_FILENAME_C1 "crom-1"
+#define CHIP_NAME_C2     "C2-ROM"
+#define DUMP_FILENAME_C2 "c2dump.bin"
+#define PROG_FILENAME_C2 "crom-2"
+#define CHIP_NAME_C3     "C3-ROM"
+#define DUMP_FILENAME_C3 "c3dump.bin"
+#define PROG_FILENAME_C3 "crom-3"
 #define END_ADDRESS_C   (0x40000000 / 4) // 1 gig
 
-#define CHIP_NAME_V     "V-ROM"
-#define DUMP_FILENAME_V "vrom.bin"
+#define CHIP_NAME_V     "V1-ROM"
+#define DUMP_FILENAME_V "vromdump.bin"
 #define PROG_FILENAME_V "vrom"
 #define END_ADDRESS_V   (0x40000000 / 4) // 1 gig
 
-#define VERSION "1"
+#define VERSION "1.1"
 
 //#define DEBUG_PRINT(...) do{ UART_printf( __VA_ARGS__ ); } while( 0 )
 //#define DEBUG_PRINT(...) do{ USB_printf( __VA_ARGS__ ); } while( 0 )
@@ -92,20 +104,20 @@
 #define MENU_DONE    6
 #define MENU_ERROR   7
 
-#define CHIP_P       0
-#define CHIP_S       1
-#define CHIP_M       2
-#define CHIP_C       3
-#define CHIP_V       4
+#define CHIP_P1       0
+#define CHIP_P2       1
+#define CHIP_P3       2
+#define CHIP_S       3
+#define CHIP_M       4
+#define CHIP_C1       5
+#define CHIP_C2       6
+#define CHIP_C3       7
+#define CHIP_V       8
    
-#define MODE_DUMP    1
-#define MODE_PROG    2
-#define MODE_VERI    3
-
 #define MODE_TEST    0
-#define MODE_DUMP    1
-#define MODE_PROG    2
-#define MODE_VERI    3
+#define MODE_PROG    1
+#define MODE_VERI    2
+#define MODE_DUMP    3
 
 // dump buffer
 #define BUFFER_SIZE 0x10000

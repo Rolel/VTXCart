@@ -38,14 +38,18 @@ uint32_t Mount_Prog(void)
 void doGpioInit(void)
 {
   switch (cur_chip) {
-    case CHIP_P:
+    case CHIP_P1:
+    case CHIP_P2:
+    case CHIP_P3:
       P_GPIO_Init();
       break;
     case CHIP_S:
     case CHIP_M:
       SM_GPIO_Init();
       break;
-    case CHIP_C:
+    case CHIP_C1:
+    case CHIP_C2:
+    case CHIP_C3:
     case CHIP_V:
       CV_GPIO_Init();
       break;
@@ -58,14 +62,18 @@ void doTest(void)
   if (flg_test) return;
 
   switch (cur_chip) {
-    case CHIP_P:
+    case CHIP_P1:
+    case CHIP_P2:
+    case CHIP_P3:
       P_Test();
       break;
     case CHIP_S:
     case CHIP_M:
       SM_Test();
       break;
-    case CHIP_C:
+    case CHIP_C1:
+    case CHIP_C2:
+    case CHIP_C3:
     case CHIP_V:
       CV_Test();
       break;
@@ -81,14 +89,18 @@ void doDump(void)
   UINT bw;
 
   switch (cur_chip) {
-    case CHIP_P:
+    case CHIP_P1:
+    case CHIP_P2:
+    case CHIP_P3:
       P_Dump();
       break;
     case CHIP_S:
     case CHIP_M:
       SM_Dump();
       break;
-    case CHIP_C:
+    case CHIP_C1:
+    case CHIP_C2:
+    case CHIP_C3:
     case CHIP_V:
       CV_Dump();
       break;
@@ -101,6 +113,7 @@ void doDump(void)
     if (bw != BUFFER_SIZE) {
       f_close(&file);
       error = 1;
+      strcpy(errormsg, "File write: SD ?");
       cur_menu = MENU_ERROR;
       LCD_Clear();
     }
@@ -128,19 +141,24 @@ void doProg(void)
       f_close(&file);
       error = 1;
       cur_menu = MENU_ERROR;
+      strcpy(errormsg, "File read: SD ?");
       LCD_Clear();
     }
   }
 
   switch (cur_chip) {
-    case CHIP_P:
+    case CHIP_P1:
+    case CHIP_P2:
+    case CHIP_P3:
       P_Prog();
       break;
     case CHIP_S:
     case CHIP_M:
       SM_Prog();
       break;
-    case CHIP_C:
+    case CHIP_C1:
+    case CHIP_C2:
+    case CHIP_C3:
     case CHIP_V:
       CV_Prog();
       break;
@@ -166,19 +184,24 @@ void doVeri(void)
       f_close(&file);
       error = 1;
       cur_menu = MENU_ERROR;
+      strcpy(errormsg, "File read: SD ?");
       LCD_Clear();
     }
   }
 
   switch (cur_chip) {
-    case CHIP_P:
+    case CHIP_P1:
+    case CHIP_P2:
+    case CHIP_P3:
       P_Veri();
       break;
     case CHIP_S:
     case CHIP_M:
       SM_Veri();
       break;
-    case CHIP_C:
+    case CHIP_C1:
+    case CHIP_C2:
+    case CHIP_C3:
     case CHIP_V:
       CV_Veri();
       break;
@@ -249,11 +272,11 @@ int main()
       switch (cur_menu) {
         case MENU_CSEL:
           if (++cur_chip > CHIP_V) {
-            cur_chip = CHIP_P;
+            cur_chip = CHIP_P1;
           }
           break;
         case MENU_MSEL:
-          if (++cur_mode > MODE_VERI) {
+          if (++cur_mode > MODE_DUMP) {
             cur_mode = MODE_TEST;
           }
           break;
@@ -280,7 +303,7 @@ int main()
         case MENU_CSEL:
           cur_menu = MENU_MSEL;
           LCD_Clear();
-		  doGpioInit();
+          doGpioInit();
           break;
         case MENU_MSEL:
           switch (cur_mode) {
@@ -293,33 +316,36 @@ int main()
                 cur_menu = MENU_DUMP;
                 LCD_Clear();
               }
-			  else {
-				error = 1;
+              else {
+                error = 1;
+                strcpy(errormsg, "File access: SD ?");
                 cur_menu = MENU_ERROR;
                 LCD_Clear();
-			  }
+              }
               break;
             case MODE_PROG:
               if (Mount_Prog() == 0) {
                 cur_menu = MENU_PROG;
                 LCD_Clear();
               }
-			  else {
-				error = 1;
+              else {
+                error = 1;
+                strcpy(errormsg, "File access: SD ?");
                 cur_menu = MENU_ERROR;
                 LCD_Clear();
-			  }
+              }
               break;
             case MODE_VERI:
               if (Mount_Prog() == 0) {
                 cur_menu = MENU_VERI;
                 LCD_Clear();
               }
-			  else {
-				error = 1;
+              else {
+                error = 1;
+                strcpy(errormsg, "File access: SD ?");
                 cur_menu = MENU_ERROR;
                 LCD_Clear();
-			  }
+              }
               break;
             default:
               break;

@@ -5,6 +5,16 @@
 #define SECTOR_SIZE 0x20000
 #define REGION_SIZE 512
 
+// 50 = 100ns
+#define DELAY_CYCLES_WRITE_LONG 50
+#define DELAY_CYCLES_READ_LONG 50
+// 10 = 20ns
+#define DELAY_CYCLES_READ_SHORT 2
+
+#define DELAY_US_AFTER_ERASE 10000 // 10ms
+#define DELAY_US_BUFF_PROGRAM 1000 // 1ms
+
+
 // chip: 1, 2, 3, 4
 // half: 1, 2
 
@@ -12,7 +22,7 @@ static uint32_t cv_toss_address(uint32_t addr) // china pinout de/scramble
 {
   uint32_t address;
 
-  if (cur_chip == CHIP_C) { // only for C-ROM
+  if (cur_chip == CHIP_C1 || cur_chip == CHIP_C2 || cur_chip == CHIP_C3) { // only for C-ROM
     address = addr & 0xFFFFFFF0;
     if (addr & BIT0) address |= BIT3;
     if (addr & BIT1) address |= BIT2;
@@ -29,7 +39,7 @@ static uint32_t cv_desc_data(uint32_t dat) // china pinout descramble
 {
   uint32_t data = 0;
 
-  if (cur_chip == CHIP_C) { // only for C-ROM
+  if (cur_chip == CHIP_C1 || cur_chip == CHIP_C2 || cur_chip == CHIP_C3) { // only for C-ROM
     if (dat & BIT0)  data |= BIT12;
     if (dat & BIT1)  data |= BIT9;
     if (dat & BIT2)  data |= BIT8;
@@ -73,7 +83,7 @@ static uint32_t cv_scr_data(uint32_t dat) // china pinout scramble
 {
   uint32_t data = 0;
 
-  if (cur_chip == CHIP_C) { // only for C-ROM
+  if (cur_chip == CHIP_C1 || cur_chip == CHIP_C2 || cur_chip == CHIP_C3) { // only for C-ROM
     if (dat & BIT0)  data |= BIT5;
     if (dat & BIT1)  data |= BIT8;
     if (dat & BIT2)  data |= BIT3;
@@ -255,10 +265,11 @@ uint32_t CV_ReadData(uint32_t half, uint32_t addr)
   CV_SetAddress(addr);
   CV_nCE(CV_ADDR2ST(half, addr));
   CV_nOE(CV_ADDR2ST(half, addr));
-  Delay_cycles(50); // 100ns
+  Delay_cycles(DELAY_CYCLES_READ_LONG); // 100ns
   data = CV_GetData();
   CV_nOE(0x0F);
   CV_nCE(0x0F);
+  Delay_cycles(DELAY_CYCLES_READ_SHORT);
 
   return data;
 }
@@ -271,10 +282,11 @@ void CV_WriteData(uint32_t half, uint32_t addr, uint32_t data)
   CV_nOE(0x0F);
   CV_OUT(1);
   CV_nWE(0);
-  Delay_cycles(50); // 100ns
+  Delay_cycles(DELAY_CYCLES_WRITE_LONG); // 100ns
   CV_nWE(1);
   CV_OUT(0);
   CV_nCE(0x0F);
+  Delay_cycles(DELAY_CYCLES_WRITE_LONG); // 100ns
 }
 
 void CV_ReadID(uint32_t chip)
@@ -290,7 +302,7 @@ void CV_ReadID(uint32_t chip)
   CV_WriteData(half, addr, 0x90); // read ID
   test = CV_ReadData(half, addr + 0x01); // ID reg.
   CV_WriteData(half, addr, 0xFF); // exit
-  error += (test == 0x88B0) ? 0 : 1;
+  error += (test == 0x88B0) ? 0 : 2 ^ (chip - 1);
 }
 
 uint32_t CV_SectorErase(uint32_t addr)
@@ -363,15 +375,15 @@ uint32_t CV_Read(void)
   CV_SetAddress(addr);
 
   CV_nOE(CV_ADDR2ST (1, addr));
-  Delay_cycles(50);
+  Delay_cycles(DELAY_CYCLES_READ_LONG);
   d[0] = CV_GetData();
-  Delay_cycles(10);
+  Delay_cycles(DELAY_CYCLES_READ_SHORT);
   d[1] = CV_GetData();
 
   while (d[0] != d[1])
   {
-	d[0] = d[1];
-    Delay_cycles(10);
+    d[0] = d[1];
+    Delay_cycles(DELAY_CYCLES_READ_SHORT);
     d[1] = CV_GetData();
     error++;
   }
@@ -379,15 +391,15 @@ uint32_t CV_Read(void)
   data1 = d[0];
 
   CV_nOE(CV_ADDR2ST (2, addr));
-  Delay_cycles(50);
+  Delay_cycles(DELAY_CYCLES_READ_LONG);
   d[0] = CV_GetData();
-  Delay_cycles(10);
+  Delay_cycles(DELAY_CYCLES_READ_SHORT);
   d[1] = CV_GetData();
   
   while (d[0] != d[1])
   {
-	d[0] = d[1];
-    Delay_cycles(10);
+    d[0] = d[1];
+    Delay_cycles(DELAY_CYCLES_READ_SHORT);
     d[1] = CV_GetData();
     error++;
   }
@@ -422,41 +434,40 @@ void CV_Prog(void)
   addr = address;
   address += REGION_SIZE;
   if ((addr & (SECTOR_SIZE-1)) == 0) {
-	if (CV_SectorErase(addr)) {
+    if (CV_SectorErase(addr)) {
       error += SECTOR_SIZE;
-	}
-	sector = addr;
-	Delay_us(10000); // 10ms
+    }
+    sector = addr;
+    Delay_us(DELAY_US_AFTER_ERASE); // 10ms
   }
   f = 1;
   for (uint32_t i = 0; i < (REGION_SIZE * 4); i++)
   {
-	if (buffer[buffer_pos + i] != 0xFF)
-	{
-	  f = 0;
-	  break;
-	}
+    if (buffer[buffer_pos + i] != 0xFF) {
+      f = 0;
+      break;
+    }
   }
   if (f == 0)
   {
-	if (CV_BufProgram(addr)) {
+    if (CV_BufProgram(addr)) {
       error++;
-	  address = sector;
+      address = sector;
       buffer_pos = 0;
-	  flg_seek = 1;
-	  return;
-	}
-	Delay_us(1000); // 1ms
+      flg_seek = 1;
+      return;
+    }
+    Delay_us(DELAY_US_BUFF_PROGRAM); // 1ms
   }
   buffer_pos += REGION_SIZE * 4;
   if (buffer_pos >= BUFFER_SIZE) {
-	buffer_pos = 0;
+    buffer_pos = 0;
   }
 }
 
 void CV_Veri(void)
 {
-  uint32_t data = CV_Read ();
+  uint32_t data = CV_Read();
   uint32_t err = 0;
 
   if (buffer[buffer_pos++] != (data & 0xFF)) err++;
@@ -467,7 +478,7 @@ void CV_Veri(void)
   if (err) error++;
 
   if (buffer_pos >= BUFFER_SIZE) {
-	buffer_pos = 0;
+    buffer_pos = 0;
   }
 }
 
